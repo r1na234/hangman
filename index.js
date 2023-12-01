@@ -8,6 +8,8 @@ const DICTIONARY = ["АПЕЛЬСИН", "ЯБЛОКО", "ГРУША",'КАНТ',
 'АБЗАЦ', 'КАРАВАН', 'ЛЕДЕНЕЦ', 'КАШПО', 'БАРКАС', 'КАРДАН', 'ВРАЩЕНИЕ', 'ЗАЛИВНОЕ', 'МЕТРДОТЕЛЬ', 'КЛАВИАТУРА', 'РАДИАТОР', 'СЕГМЕНТ', 'ОБЕЩАНИЕ', 'МАГНИТОФОН', 'КОРДЕБАЛЕТ', 
 'ЗАВАРУШКА'];
 
+let arrayOfIdx = [];
+
 const canvas = document.getElementById('hangman');
 
 const context = canvas.getContext("2d");
@@ -127,9 +129,7 @@ function generateWord(){
     }
     let iterableDictionary = copyDictionary.filter((el)=> wordsHistory.indexOf(el)== -1);
     word = iterableDictionary[Math.floor(Math.random()*(iterableDictionary.length))];    
-    wordsHistory.push(word);
     localStorage.setItem('wordsHistory', JSON.stringify(wordsHistory));
-    console.log(word);
     return word, wordsHistory;
 }
 
@@ -150,11 +150,11 @@ startGame();
 
 
 const successFunc =()=>{
-    console.log('win');
     score++;
-    startGame();
+    arrayOfIdx = [];
     clearCanvas();
     step = 0;
+    startGame();
 }
 
 const correctLetterFunc=(word, letter, idx)=>{
@@ -170,21 +170,28 @@ const correctLetterFunc=(word, letter, idx)=>{
      }
 }
 
+const looseFunc =()=>{
+    clearCanvas();
+    step = 0;
+    arrayOfIdx = [];
+    deathCounter=9;
+    startGame();
+}
+
 const wrongLetterFunc = (letter)=>{
     deathCounter--;
     Draw(draws[step++])
     if(deathCounter==0){
-        console.log('fail');
-        clearCanvas();
-        step = 0;
+        looseFunc();
     }
 }
 
 const eventFunc = (el)=>{
     let letter = el.target.innerHTML;
-    let idx = word.indexOf(letter);    
-    if (idx !== -1){
+    let idx = word.indexOf(letter);
+    if (idx !== -1 && !arrayOfIdx.includes(idx)){
         correctLetterFunc(word, letter, idx);
+        arrayOfIdx.push(idx); 
     }
     else {
         wrongLetterFunc(letter)
